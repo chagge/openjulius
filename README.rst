@@ -10,7 +10,9 @@ Modification
 
 This fork adds support for the confusion networks being send over sockets into the output module. 
 Also, this fork allows to reuse a running Julius instance for another call session. To use this feature, you need 
-to tell Julius to get ready for it by sending it USR1 signal::
+to tell Julius to get ready for it by sending it USR1 signal:
+
+.. code-block:: bash
 
  $ killall -USR1 julius
  
