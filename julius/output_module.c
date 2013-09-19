@@ -563,8 +563,46 @@ result_graph(Recog *recog, void *dummy)
 
 /** 
  * <JA>
- * ��������λ���ơ�ǧ����ǽ���֡������Ԥ����֡ˤ����ä��Ȥ��ν���
+ * ½àÈ÷¤¬½ªÎ»¤·¤Æ¡¢Ç§¼±²ÄÇ½¾õÂÖ¡ÊÆþÎÏÂÔ¤Á¾õÂÖ¡Ë¤ËÆþ¤Ã¤¿¤È¤­¤Î½ÐÎÏ
  * 
+ * </JA>
+ * <EN>
+ * Output the obtained confusion network.
+ *
+ * </EN>
+ */
+static void
+result_confnet(Recog *recog, void *dummy)
+{
+  CN_CLUSTER *c;
+  int i;
+  RecogProcess *r;
+  boolean multi;
+
+  if (recog->process_list->next != NULL) multi = TRUE;
+  else multi = FALSE;
+
+  for(r=recog->process_list;r;r=r->next) {
+    if (! r->live) continue;
+    if (r->result.confnet == NULL) continue;  /* no confnet obtained */
+
+    module_send(module_sd, "<CONFNET>\n");
+    for(c=r->result.confnet;c;c=c->next) {
+      module_send(module_sd, "  <WORD>\n");
+      for(i=0;i<c->wordsnum;i++) {
+        if (c->pp[i] >= 0.001)
+          module_send(module_sd, "    <ALTERNATIVE PROB=\"%.3f\">%s</ALTERNATIVE>\n", c->pp[i], (c->words[i] == WORD_INVALID) ? "" : r->lm->winfo->woutput[c->words[i]]);
+      }
+      module_send(module_sd, "  </WORD>\n");
+    }
+    module_send(module_sd, "</CONFNET>\n");
+  }
+}
+
+/**
+ * <JA>
+ * 準備が終了して、認識可能状態（入力待ち状態）に入ったときの出力
+ *
  * </JA>
  * <EN>
  * Output when ready to recognize and start waiting speech input.
@@ -751,6 +789,8 @@ setup_output_msock(Recog *recog, void *data)
   callback_add(recog, CALLBACK_RESULT_GMM, result_gmm, data);
   /* below will not be called if "-graphout" not specified */
   callback_add(recog, CALLBACK_RESULT_GRAPH, result_graph, data);
+  /* below will be called when "-confnet" is specified */
+  callback_add(recog, CALLBACK_RESULT_CONFNET, result_confnet, data);
 
   //callback_add(recog, CALLBACK_EVENT_PAUSE, status_pause, data);
   //callback_add(recog, CALLBACK_EVENT_RESUME, status_resume, data);

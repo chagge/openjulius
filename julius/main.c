@@ -22,7 +22,7 @@
  * Copyright (c) 2005-2013 Julius project team, Nagoya Institute of Technology
  * All rights reserved
  */
-
+#include<signal.h>
 #include "app.h"
 
 boolean separate_score_flag = FALSE;
@@ -69,11 +69,18 @@ opt_outfile(Jconf *jconf, char *arg[], int argnum)
   outfile_enabled = TRUE;
   return TRUE;
 }
+
+void sig_handler(int signo)
+{
+        module_server();
+}
    
 /**********************************************************************/
 int
 main(int argc, char *argv[])
 {
+  signal(SIGUSR1, sig_handler);
+
   FILE *fp;
   Recog *recog;
   Jconf *jconf;

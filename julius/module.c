@@ -769,18 +769,21 @@ module_setup(Recog *recog, void *data)
   setup_output_msock(recog, data);
 }
   
+int listen_sd = -1;    ///< Socket to listen to a client
+
 void
 module_server()
 {
-  int listen_sd;	///< Socket to listen to a client
 #if defined(_WIN32) && !defined(__CYGWIN32__)
   int sd;
 #endif
   
   /* prepare socket to listen */
+  if(listen_sd < 0) {
   if ((listen_sd = ready_as_server(module_port)) < 0) {
     fprintf(stderr, "Error: failed to bind socket\n");
     return;
+  }
   }
   
   printf  ("///////////////////////////////\n");
